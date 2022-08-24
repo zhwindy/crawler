@@ -81,7 +81,7 @@ def main():
     """
     collections = get_collections(collection_id=COLLECTION_ID)
     
-    conn = connect_mysql()
+    conn = connect_mysql(host=HOST, user=USER, passwd=PASSWD, db="sol_data")
     
     service = get_selenium_webservice()
     driver = webdriver.Chrome(service=service)
@@ -183,5 +183,5 @@ def test_collections():
 
 
 if __name__ == "__main__":
-    # main()
-    test_collections()
+    main()
+    # test_collections()
