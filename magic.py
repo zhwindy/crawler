@@ -29,7 +29,7 @@ COLLECTION_ID = None
 def get_selenium_webservice():
     platform_str = platform.system()
     if platform_str == "Windows":
-        service = Service(executable_path="C:\crawler\chromedriver.exe")
+        service = Service(executable_path="C:\driver\chromedriver.exe")
     elif platform_str == "Darwin":
         service = Service(executable_path="/Users/zhaopengfei/work/driver/chromedriver.exe")
     else:
