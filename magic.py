@@ -1,5 +1,4 @@
 #encoding=utf-8
-from cgitb import handler
 import time
 import json
 import random
@@ -31,9 +30,9 @@ def get_selenium_webservice():
     if platform_str == "Windows":
         service = Service(executable_path="C:\driver\chromedriver.exe")
     elif platform_str == "Darwin":
-        service = Service(executable_path="/Users/zhaopengfei/work/driver/chromedriver.exe")
+        service = Service(executable_path="/Users/zhaopengfei/work/chrome-driver/chromedriver")
     else:
-        service = Service(executable_path="/data/driver/chromedriver.exe")
+        service = Service(executable_path="/data/driver/chromedriver")
 
     return service
 
@@ -55,7 +54,7 @@ def get_collections(collection_id=None):
     if collection_id:
         sql = f"SELECT id, symbol FROM sol_data.magic_collection where id={collection_id}"
     else:
-        sql = "SELECT id, symbol FROM sol_data.magic_collection where synced=0 order by id desc limit 100"
+        sql = "SELECT id, symbol FROM sol_data.magic_collection where id> 150 and synced=0 order by id desc"
     cur.execute(sql)
     symbols = cur.fetchall()
     conn.close()
@@ -88,7 +87,7 @@ def main():
     
     col_index = 1
     for col_id, col_value in collections.items():
-        collection = str(col_value).lower().strip()
+        collection = str(col_value).strip()
         if not collection:
             continue
         msg = f"--------------------process: {col_index} col: {collection}"
@@ -98,7 +97,7 @@ def main():
         collections_total_nft_count = 0
         collections_total_nft = []
         while True:
-            payload = {"$match":{"collectionSymbol":collection},"$sort":{"takerAmount":1},"$skip":offset,"$limit":150,"status":["all"]}
+            payload = {"$match":{"collectionSymbol":collection},"$sort":{"createdAt":-1},"$skip":offset,"$limit":150,"status":["all"]}
 
             query = urllib.parse.quote_plus(json.dumps(payload))
             params = str(query).replace("+", "")
@@ -168,9 +167,9 @@ def get_file_name(collection):
     if platform_str == "Windows":
         file_name = f"C:\crawler_data\{collection}.json"
     elif platform_str == "Darwin":
-        file_name = f"/Users/zhaopengfei/work/collection_data/{collection}.json"
+        file_name = f"/Users/zhaopengfei/work/crawler/{collection}.json"
     else:
-        file_name = f"/Users/zhaopengfei/work/collection_data/{collection}.json"
+        file_name = f"/Users/zhaopengfei/work/crawler/{collection}.json"
     return file_name
 
 
@@ -182,6 +181,56 @@ def test_collections():
         logging.info(msg)
 
 
+def test_crawler():
+    """
+    抓取测试
+    """
+    collection = 'mongomons'
+
+    service = get_selenium_webservice()
+    driver = webdriver.Chrome(service=service)
+
+    offset = 0
+    index = 0
+    collections_total_nft_count = 0
+    collections_total_nft = []
+    while True:
+        payload = {"$match":{"collectionSymbol":collection},"$sort":{"createdAt":-1},"$skip":offset,"$limit":150,"status":["all"]}
+
+        query = urllib.parse.quote_plus(json.dumps(payload))
+        params = str(query).replace("+", "")
+
+        url = f"https://api-mainnet.magiceden.io/rpc/getListedNFTsByQueryLite?q={params}"
+        logging.info(url)
+
+        driver.get(url)
+
+        count = random.randint(3, 6)
+        time.sleep(count)
+        elements = driver.find_element(By.TAG_NAME, 'body')
+        content = elements.text
+        json_data = json.loads(content)
+        nft_list = json_data.get("results", [])
+        nft_list_count = len(nft_list)
+        msg = f"index:{index} offset:{offset} count:{nft_list_count}"
+        logging.info(msg)
+
+        collections_total_nft_count += nft_list_count
+        collections_total_nft.extend(nft_list)
+        if (nft_list_count < 150) or (not nft_list):
+            break
+        index += 1
+        offset += 150
+
+    data = {"result": collections_total_nft}
+    save = save_data_to_file(collection, data)
+    # 若保存失败,则跳出
+    msg = f"{collection} total count:{collections_total_nft_count}"
+    logging.info(msg)
+
+
+
 if __name__ == "__main__":
-    main()
+    test_crawler()
     # test_collections()
+    # main()
