@@ -68,7 +68,7 @@ def crawler(driver, chain=None):
             result = elements.text
             content = result.split("\n")
             cate = content[-1]
-            msg = f"content: {content}, cate: {msg}"
+            msg = f"content: {content}, cate: {cate}"
             logging.info(msg)
             data = {
                 "chain": chain,
