@@ -58,7 +58,6 @@ def read_data_from_file(collection):
     return data
 
 
-
 def get_file_name(collection):
     """
     生成文件路径和文件名
