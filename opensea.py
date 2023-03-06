@@ -20,6 +20,8 @@ logging.basicConfig(format='%(asctime)s-%(name)s-%(levelname)s-%(message)s', lev
 # 指定抓取单个collection
 COLLECTION_ID = None
 
+COUNT = 0
+
 
 def get_selenium_webservice():
     platform_str = platform.system()
@@ -60,9 +62,11 @@ def crawler(driver, chain=None):
         return None
     collections = get_slugs_by_chain(chain=chain)
     for collection in collections:
+        COUNT += 1
         url = f"https://opensea.io/collection/{collection}"
         logging.info(url)
         driver.get(url)
+        logging.info(f"Process index: {COUNT}")
         try:
             elements = driver.find_element(By.XPATH, '//span[@data-testid="collection-description-metadata-category"]')
             result = elements.text
@@ -99,6 +103,7 @@ def start(chain):
     while 1:
         crawler(driver, chain=chain)
         time.sleep(5)
+        logging.info("------------------------------------sleep 5s--------------------------------------------------")
     driver.quit()
     driver.close()
 
