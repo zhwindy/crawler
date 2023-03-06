@@ -58,6 +58,7 @@ def crawler(driver, chain=None):
     """
     crawler category from opensea
     """
+    global COUNT
     if not chain:
         return None
     collections = get_slugs_by_chain(chain=chain)
