@@ -16,10 +16,6 @@ logging.basicConfig(format='%(asctime)s-%(name)s-%(levelname)s-%(message)s', lev
 使用selenium 4版本 浏览器驱动Webdriver的初始化方式与之前版本有所不同
 """
 
-HOST = ""
-USER = "root"
-PASSWD = ""
-
 # 指定抓取单个collection
 COLLECTION_ID = None
 
